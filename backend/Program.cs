@@ -41,11 +41,14 @@ server.Start(socket =>
             }
 
             var username = clients[socket];
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+
             var payload = new
             {
                 type = "chat",
                 username = username,
-                message = data["message"]
+                message = data["message"],
+                timestamp = timestamp
             };
 
             var json = JsonSerializer.Serialize(payload);
