@@ -1,7 +1,8 @@
 ﻿using Fleck;
 using System.Collections.Concurrent;
+using System.Text.Json;
 
-var allSockets = new ConcurrentBag<IWebSocketConnection>();
+var clients = new ConcurrentDictionary<IWebSocketConnection, string>();
 
 var server = new WebSocketServer("ws://0.0.0.0:8181");
 server.Start(socket =>
@@ -9,11 +10,11 @@ server.Start(socket =>
     socket.OnOpen = () =>
     {
         Console.WriteLine("Connected: " + socket.ConnectionInfo.ClientIpAddress);
-        allSockets.Add(socket);
     };
 
     socket.OnClose = () =>
     {
+        clients.TryRemove(socket, out var username);
         Console.WriteLine("Disconnected: " + socket.ConnectionInfo.ClientIpAddress);
     };
 
