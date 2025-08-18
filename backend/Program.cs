@@ -16,6 +16,7 @@ server.Start(socket =>
     {
         clients.TryRemove(socket, out var username);
         Console.WriteLine("Disconnected: " + socket.ConnectionInfo.ClientIpAddress);
+        BroadcastUserList();
     };
 
     socket.OnMessage = message =>
@@ -31,6 +32,7 @@ server.Start(socket =>
             var username = data["username"];
             clients[socket] = username;
             Console.WriteLine($"{username} connected.");
+            BroadcastUserList();
         }
         else if (type == "chat" && data.ContainsKey("message"))
         {
@@ -59,6 +61,26 @@ server.Start(socket =>
         }
     };
 });
+
+void BroadcastUserList()
+{
+    var userList = clients.Values.Distinct().ToList();
+
+    var payload = new
+    {
+        type = "users",
+        users = userList
+    };
+
+    var json = JsonSerializer.Serialize(payload);
+
+    foreach (var client in clients.Keys)
+    {
+        client.Send(json);
+    }
+
+    Console.WriteLine("Updated users list sent.");
+}
 
 Console.WriteLine("WebSocket server started at ws://localhost:8181");
 Console.ReadLine();
