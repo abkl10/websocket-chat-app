@@ -6,6 +6,8 @@ function App() {
   const [inputUsername, setInputUsername] = useState('');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
+  const [users, setUsers] = useState([]);
+
 
   const messagesEndRef = useRef(null);
 
@@ -31,6 +33,11 @@ function App() {
       if (data.type === 'chat') {
         setMessages(prev => [...prev, data]);
       }
+
+      if (data.type === 'users') {
+        setUsers(data.users);
+      }
+
     };
 
     socket.onclose = () => {
@@ -51,6 +58,14 @@ function App() {
 
   return (
     <div style={{ padding: 20, fontFamily: 'Arial' }}>
+        <div style={{ width: 200, borderRight: '1px solid #ccc', paddingRight: 10 }}>
+            <h4>Connected Users</h4>
+            <ul style={{ paddingLeft: 15 }}>
+            {users.map((user, index) => (
+                <li key={index}>{user}</li>
+            ))}
+            </ul>
+        </div>
       {!username ? (
         <div>
           <h2>Enter your username:</h2>
