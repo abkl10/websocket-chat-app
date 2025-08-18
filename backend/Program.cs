@@ -19,10 +19,39 @@ server.Start(socket =>
 
     socket.OnMessage = message =>
     {
-        Console.WriteLine("Message: " + message);
-        foreach (var s in allSockets)
+        var data = JsonSerializer.Deserialize<Dictionary<string, string>>(message);
+
+        if (data is null || !data.ContainsKey("type")) return;
+
+        var type = data["type"];
+
+        if (type == "login" && data.ContainsKey("username"))
         {
-            s.Send(message);
+            var username = data["username"];
+            clients[socket] = username;
+            Console.WriteLine($"{username} connected.");
+        }
+        else if (type == "chat" && data.ContainsKey("message"))
+        {
+            if (!clients.ContainsKey(socket))
+            {
+                socket.Send("You must login first.");
+                return;
+            }
+
+            var username = clients[socket];
+            var payload = new
+            {
+                type = "chat",
+                username = username,
+                message = data["message"]
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            foreach (var client in clients.Keys)
+            {
+                client.Send(json);
+            }
         }
     };
 });
