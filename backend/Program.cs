@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Concurrent;
 using System.Text.Json;
+using backend.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ChatDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36)))
 );
+
+builder.Services.AddSingleton<JwtService>();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
