@@ -1,4 +1,4 @@
-namespace WebSocketChatServer.DTOs;
+namespace backend.DTOs;
 
 public class LoginRegisterDto
 {
