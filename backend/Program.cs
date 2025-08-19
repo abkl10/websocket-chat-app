@@ -16,6 +16,8 @@ builder.Services.AddDbContext<ChatDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36)))
 );
 
+var app = builder.Build();
+
 var clients = new ConcurrentDictionary<IWebSocketConnection, string>();
 
 var server = new WebSocketServer("ws://0.0.0.0:8181");
@@ -95,6 +97,7 @@ void BroadcastUserList()
 
     Console.WriteLine("Updated users list sent.");
 }
+app.Run();
 
 Console.WriteLine("WebSocket server started at ws://localhost:8181");
 Console.ReadLine();
