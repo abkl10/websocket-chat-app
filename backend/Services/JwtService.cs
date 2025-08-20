@@ -35,4 +35,34 @@ public class JwtService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    public string? ValidateToken(string token)
+    {
+        try
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
+
+            var parameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+
+                ValidateIssuer = true,
+                ValidIssuer = _config["Jwt:Issuer"],
+
+                ValidateAudience = true,
+                ValidAudience = _config["Jwt:Audience"],
+
+                ValidateLifetime = true
+            };
+
+            var principal = tokenHandler.ValidateToken(token, parameters, out _);
+            return principal.Identity?.Name;
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }
