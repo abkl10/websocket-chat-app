@@ -57,7 +57,8 @@ public class JwtService
                 ValidateLifetime = true
             };
 
-            var principal = tokenHandler.ValidateToken(token, parameters, out _);
+            SecurityToken validatedToken;
+            var principal = tokenHandler.ValidateToken(token, parameters, out validatedToken);
             return principal.Identity?.Name;
         }
         catch

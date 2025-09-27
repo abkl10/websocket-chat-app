@@ -1,26 +1,6 @@
-﻿using backend.Data;
-using Fleck;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Text.Json;
-using backend.Services;
-
-
-var builder = WebApplication.CreateBuilder(args);
-
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-builder.Services.AddDbContext<ChatDbContext>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36)))
-);
-
-builder.Services.AddSingleton<JwtService>();
-builder.Services.AddControllers();
-
-var app = builder.Build();
+using Fleck;
 
 var clients = new ConcurrentDictionary<IWebSocketConnection, string>();
 
@@ -29,31 +9,34 @@ server.Start(socket =>
 {
     socket.OnOpen = () =>
     {
-        Console.WriteLine("Connected: " + socket.ConnectionInfo.ClientIpAddress);
+        Console.WriteLine("Client connected.");
     };
 
     socket.OnClose = () =>
     {
-        clients.TryRemove(socket, out var username);
-        Console.WriteLine("Disconnected: " + socket.ConnectionInfo.ClientIpAddress);
-        BroadcastUserList();
+        if (clients.TryRemove(socket, out var username))
+        {
+            Console.WriteLine($"{username} disconnected.");
+            BroadcastUserList();
+        }
     };
 
     socket.OnMessage = message =>
     {
         var data = JsonSerializer.Deserialize<Dictionary<string, string>>(message);
-
         if (data is null || !data.ContainsKey("type")) return;
 
         var type = data["type"];
 
+        // User login
         if (type == "login" && data.ContainsKey("username"))
         {
             var username = data["username"];
             clients[socket] = username;
-            Console.WriteLine($"{username} connected.");
+            Console.WriteLine($"{username} logged in.");
             BroadcastUserList();
         }
+        // Chat message
         else if (type == "chat" && data.ContainsKey("message"))
         {
             if (!clients.ContainsKey(socket))
@@ -101,7 +84,6 @@ void BroadcastUserList()
 
     Console.WriteLine("Updated users list sent.");
 }
-app.Run();
 
-Console.WriteLine("WebSocket server started at ws://localhost:8181");
+Console.WriteLine("✅ WebSocket server running on ws://localhost:8181");
 Console.ReadLine();
