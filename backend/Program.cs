@@ -25,11 +25,18 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<JwtService>(); 
+builder.Services.AddControllers(); 
 
 var app = builder.Build();
 
 var jwtService = app.Services.CreateScope().ServiceProvider.GetRequiredService<JwtService>();
 
+app.UseCors("AllowFrontend");
+
+app.UseAuthentication(); 
+app.UseAuthorization();  
+
+app.MapControllers(); 
 app.RunAsync();
 
 
