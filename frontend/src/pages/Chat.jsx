@@ -108,7 +108,7 @@ export default function Chat() {
           
           <div className="sidebar-footer">
             <div className="user-info">
-              <strong>Logged in as:</strong>
+              <strong>Logged in as : </strong>
               <span className="current-username">{username}</span>
             </div>
             <button onClick={handleLogout} className="logout-button">
@@ -122,10 +122,8 @@ export default function Chat() {
             <div className="chat-header">
               <h2>Chat Room</h2>
               <div className="user-controls">
-                <span className="welcome-message">Welcome, <strong>{username}</strong></span>
-                <button onClick={handleLogout} className="logout-button-small">
-                  Logout
-                </button>
+                <span className="welcome-message">Welcome <strong>{username}</strong></span>
+                
               </div>
             </div>
             
