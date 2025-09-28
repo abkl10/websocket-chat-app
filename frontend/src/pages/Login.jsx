@@ -15,10 +15,12 @@ export default function Login() {
 
     const data = await res.json();
     if (res.ok) {
+      console.log("login ok");
       localStorage.setItem("token", data.token);
       localStorage.setItem("username", form.username);
       navigate("/chat");
     } else {
+      console.log("login failed");
       setError(data.error || "Login failed");
     }
   }
