@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import '../styles/Login.css';
 
 export default function Login() {
   const [form, setForm] = useState({ username: "", password: "" });
