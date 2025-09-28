@@ -1,44 +1,31 @@
 import { useEffect, useRef, useState } from 'react';
 
 export default function Chat() {
-  const [ws, setWs] = useState(null);
-  const [username, setUsername] = useState(localStorage.getItem("username"));
+  const [username] = useState(localStorage.getItem("username"));
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
 
+  const ws = useRef(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (!username) return;
 
     const token = localStorage.getItem("token");
-    const socket = new WebSocket(`ws://localhost:8181/?token=${token}`);
-    setWs(socket);
+    ws.current = new WebSocket(`ws://localhost:8181/?token=${encodeURIComponent(token)}`);
 
-    socket.onopen = () => {
-      console.log("WebSocket connected");
-    };
-
-    socket.onmessage = (event) => {
+    ws.current.onopen = () => console.log("Connected");
+    ws.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      if (data.type === 'chat') {
-        setMessages(prev => [...prev, data]);
-      }
-      if (data.type === 'users') {
-        setUsers(data.users);
-      }
+      if (data.type === 'chat') setMessages(prev => [...prev, data]);
+      if (data.type === 'users') setUsers(data.users);
     };
+    ws.current.onclose = () => console.log("Disconnected");
 
-    socket.onclose = () => {
-      alert("Disconnected");
-      setUsername('');
-      setWs(null);
-      localStorage.removeItem("token");
-      localStorage.removeItem("username");
+    return () => {
+      if (ws.current) ws.current.close();
     };
-
-    return () => socket.close();
   }, [username]);
 
   useEffect(() => {
@@ -46,8 +33,8 @@ export default function Chat() {
   }, [messages]);
 
   const sendMessage = () => {
-    if (ws && message.trim()) {
-      ws.send(JSON.stringify({ type: 'chat', message }));
+    if (ws.current?.readyState === WebSocket.OPEN && message.trim()) {
+      ws.current.send(JSON.stringify({ type: 'chat', message }));
       setMessage('');
     }
   };
