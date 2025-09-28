@@ -12,8 +12,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ChatDbContext>(options =>
     options.UseMySql(
@@ -45,7 +49,11 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 app.UseRouting();  
 app.UseCors("AllowFrontend");
 app.UseAuthentication(); 
