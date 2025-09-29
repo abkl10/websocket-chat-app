@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { Toaster, toast } from 'react-hot-toast';
 import '../styles/Login.css';
 
 export default function Login() {
   const [form, setForm] = useState({ username: "", password: "" });
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
 
 
   useEffect(() => {
@@ -27,11 +30,13 @@ export default function Login() {
 
     const data = await res.json();
     if (res.ok) {
+      toast.success("Login successful! Redirecting...");
       console.log("login ok");
       localStorage.setItem("token", data.token);
       localStorage.setItem("username", form.username);
-      navigate("/chat");
-    } else {
+        setTimeout(() => {
+          navigate("/chat");
+        }, 1000);    } else {
       console.log("login failed");
       setError(data.error || "Login failed");
     }
@@ -47,6 +52,30 @@ export default function Login() {
   }
 
   return (
+    <><Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#4caf50',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            duration: 5000,
+            iconTheme: {
+              primary: '#f44336',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
     <div className="login-container">
       <h2>Login</h2>
       {error && <p className="error-message">{error}</p>}
@@ -66,5 +95,6 @@ export default function Login() {
       </button>
       <p>New here? <Link to="/register">Register</Link></p>
     </div>
+    </>
   );
 }
