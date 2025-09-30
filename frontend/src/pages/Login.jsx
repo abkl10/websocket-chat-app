@@ -22,6 +22,7 @@ export default function Login() {
   }, [navigate]);
 
   async function handleLogin() {
+    try {
     const res = await fetch("http://localhost:5000/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -29,16 +30,29 @@ export default function Login() {
     });
 
     const data = await res.json();
-    if (res.ok) {
+    if (res.ok) 
+      {
       toast.success("Login successful! Redirecting...");
       console.log("login ok");
       localStorage.setItem("token", data.token);
       localStorage.setItem("username", form.username);
         setTimeout(() => {
           navigate("/chat");
-        }, 1000);    } else {
-      console.log("login failed");
-      setError(data.error || "Login failed");
+        }, 1000);   
+      } else 
+      {
+      const errorMessage = data.message || data.error || "Login failed";
+        toast.error(errorMessage);
+        setError(errorMessage);
+        console.log("login failed");
+    }
+    } catch (error) {
+      const errorMsg = "Network error - could not connect to server";
+      toast.error(errorMsg);
+      setError(errorMsg);
+      console.error("Login error:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
