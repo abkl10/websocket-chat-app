@@ -9,8 +9,6 @@ export default function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-
-
   useEffect(() => {
     const token = localStorage.getItem("token");
     const username = localStorage.getItem("username");
@@ -22,30 +20,36 @@ export default function Login() {
   }, [navigate]);
 
   async function handleLogin() {
-    try {
-    const res = await fetch("http://localhost:5000/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form)
-    });
+    if (!form.username || !form.password) {
+      toast.error("Please fill in all fields");
+      setError("Please fill in all fields");
+      return;
+    }
 
-    const data = await res.json();
-    if (res.ok) 
-      {
-      toast.success("Login successful! Redirecting...");
-      console.log("login ok");
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("username", form.username);
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      });
+
+      const data = await res.json();
+      
+      if (res.ok) {
+        toast.success("Login successful! Redirecting...");
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", form.username);
         setTimeout(() => {
           navigate("/chat");
-        }, 1000);   
-      } else 
-      {
-      const errorMessage = data.message || data.error || "Login failed";
+        }, 1000);
+      } else {
+        const errorMessage = data.message || data.error || "Login failed";
         toast.error(errorMessage);
         setError(errorMessage);
-        console.log("login failed");
-    }
+      }
     } catch (error) {
       const errorMsg = "Network error - could not connect to server";
       toast.error(errorMsg);
@@ -56,23 +60,34 @@ export default function Login() {
     }
   }
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !isLoading) {
+      handleLogin();
+    }
+  };
+
   const token = localStorage.getItem("token");
   if (token) {
     return (
       <div className="login-container">
-        <div className="loading">Redirecting to chat...</div>
+        <div className="loading">
+          <p>Redirecting to chat...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <><Toaster 
+    <>
+      <Toaster 
         position="top-right"
         toastOptions={{
           duration: 4000,
           style: {
             background: '#363636',
             color: '#fff',
+            borderRadius: '10px',
+            fontSize: '14px',
           },
           success: {
             duration: 3000,
@@ -90,25 +105,42 @@ export default function Login() {
           },
         }}
       />
-    <div className="login-container">
-      <h2>Login</h2>
-      {error && <p className="error-message">{error}</p>}
-      <input 
-        placeholder="Username" 
-        value={form.username}
-        onChange={(e) => setForm({ ...form, username: e.target.value })} 
-      />
-      <input 
-        placeholder="Password" 
-        type="password" 
-        value={form.password}
-        onChange={(e) => setForm({ ...form, password: e.target.value })} 
-      />
-      <button onClick={handleLogin} className="login-button">
-        Login
-      </button>
-      <p>New here? <Link to="/register">Register</Link></p>
-    </div>
+      <div className="login-container">
+        <div className="login-card">
+          <h2>Welcome Back</h2>
+          <p className="login-subtitle">Sign in to continue chatting</p>
+          
+          {error && <div className="error-message">{error}</div>}
+          
+          <input 
+            placeholder="Username" 
+            value={form.username}
+            onChange={(e) => setForm({ ...form, username: e.target.value })}
+            onKeyPress={handleKeyPress}
+            disabled={isLoading}
+          />
+          <input 
+            placeholder="Password" 
+            type="password" 
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            onKeyPress={handleKeyPress}
+            disabled={isLoading}
+          />
+          
+          <button 
+            onClick={handleLogin} 
+            className={`login-button ${isLoading ? 'loading' : ''}`}
+            disabled={isLoading}
+          >
+            {isLoading ? '' : 'Login'}
+          </button>
+          
+          <div className="register-prompt">
+            New here? <Link to="/register">Create an account</Link>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
