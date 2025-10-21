@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Toaster, toast } from 'react-hot-toast';
-import '../styles/Login.css'; // Using the same CSS file
+import '../styles/Login.css'; 
 
 export default function Register() {
   const [form, setForm] = useState({ username: "", password: "" });
