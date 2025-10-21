@@ -62,9 +62,9 @@ body {
   border: 2px solid #e1e5e9;
   border-radius: 10px;
   font-size: 16px;
-  text-emphasis-color: black;
   transition: all 0.3s ease;
   background: #f8f9fa;
+  color: #333;
 }
 
 .login-container input:focus {
@@ -73,10 +73,12 @@ body {
   background: white;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
   transform: translateY(-2px);
+  color: #333;
 }
 
 .login-container input::placeholder {
   color: black;
+  color: #333;
 }
 
 .login-button {
