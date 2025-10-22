@@ -134,8 +134,20 @@ body {
 
 .message-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
+}
+
+.username {
+  font-weight: 600;
+  color: #667eea;
+}
+
+.timestamp {
+  font-size: 0.75rem;
+  color: #888;
+  opacity: 0.8;
 }
 
 .message-sender {
