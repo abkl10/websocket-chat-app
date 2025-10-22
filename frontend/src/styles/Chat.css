@@ -208,6 +208,87 @@ body {
   cursor: not-allowed;
 }
 
+.users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  border: 1px solid transparent;
+}
+
+.user-item:hover {
+  background-color: #f8f9fa;
+}
+
+.user-item.current-user {
+  background-color: #e3f2fd;
+  border-color: #667eea;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.user-item .username {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.online-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #4caf50;
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 4px rgba(76, 175, 80, 0);
+  }
+  
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+/* Remove old user list styles if they exist */
+.users-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-dot {
+  display: none; /* Hide the old dot indicator */
+}
 @media (max-width: 768px) {
   .app-container {
     width: 100%;
@@ -219,3 +300,4 @@ body {
     display: none;
   }
 }
+

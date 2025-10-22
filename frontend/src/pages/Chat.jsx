@@ -108,6 +108,25 @@ export default function Chat() {
     });
   };
 
+  const generateUserAvatar = (username) => {
+    const colors = [
+      '#667eea', '#764ba2', '#f093fb', '#f5576c', 
+      '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
+      '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'
+    ];
+    
+    const colorIndex = username.charCodeAt(0) % colors.length;
+    const backgroundColor = colors[colorIndex];
+    
+    const initials = username.charAt(0).toUpperCase();
+    
+    return {
+      backgroundColor,
+      initials,
+      color: '#ffffff' 
+    };
+  };
+
   const sendMessage = () => {
     if (ws.current?.readyState === WebSocket.OPEN && message.trim()) {
       ws.current.send(JSON.stringify({ type: 'chat', message }));
@@ -138,14 +157,31 @@ export default function Chat() {
             </div>
           </div>
           
-          <ul className="users-list">
-            {users.map((user, index) => (
-              <li key={index} className={user === username ? 'current-user' : ''}>
-                <span className="user-dot">●</span>
+          <div className="users-list">
+        {users.map((user, index) => {
+          const avatar = generateUserAvatar(user);
+          return (
+            <div 
+              key={index} 
+              className={`user-item ${user === username ? 'current-user' : ''}`}
+            >
+              <div 
+                className="user-avatar"
+                style={{ 
+                  backgroundColor: avatar.backgroundColor,
+                  color: avatar.color
+                }}
+              >
+                {avatar.initials}
+              </div>
+              <span className="username">
                 {user} {user === username && '(You)'}
-              </li>
-            ))}
-          </ul>
+              </span>
+              <div className="online-indicator"></div>
+            </div>
+          );
+        })}
+      </div>
           
           <div className="sidebar-footer">
             <div className="user-info">
