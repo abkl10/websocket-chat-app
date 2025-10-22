@@ -67,6 +67,47 @@ export default function Chat() {
     navigate("/login");
   };
 
+    const formatMessageTime = (timestamp) => {
+    const now = new Date();
+    const messageDate = new Date(timestamp);
+    const diffInHours = (now - messageDate) / (1000 * 60 * 60);
+    
+    if (messageDate.toDateString() === now.toDateString()) {
+      return messageDate.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      });
+    }
+    
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (messageDate.toDateString() === yesterday.toDateString()) {
+      return `Yesterday ${messageDate.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      })}`;
+    }
+    
+    if (diffInHours < 168) {
+      return messageDate.toLocaleDateString('en-US', { 
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true 
+      });
+    }
+    
+    return messageDate.toLocaleDateString('en-US', { 
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
+
   const sendMessage = () => {
     if (ws.current?.readyState === WebSocket.OPEN && message.trim()) {
       ws.current.send(JSON.stringify({ type: 'chat', message }));
@@ -133,16 +174,18 @@ export default function Chat() {
                   <p>No messages yet. Start the conversation!</p>
                 </div>
               ) : (
-                messages.map((msg, i) => (
-                  <div key={i} className={`message ${msg.username === username ? 'own-message' : ''}`}>
+                messages.map((msg, index) => (
+                  <div key={index} className="message">
                     <div className="message-header">
-                      <strong className="message-sender">{msg.username}</strong>
-                      <span className="message-time">{msg.timestamp}</span>
+                      <span className="username">{msg.username} </span>
+                      <span className="timestamp">
+                        {formatMessageTime(msg.timestamp)}
+                      </span>
                     </div>
                     <div className="message-content">{msg.message}</div>
                   </div>
-                ))
-              )}
+                )))}
+                
               <div ref={messagesEndRef} />
             </div>
             
