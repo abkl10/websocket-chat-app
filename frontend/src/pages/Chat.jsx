@@ -109,23 +109,26 @@ export default function Chat() {
   };
 
   const generateUserAvatar = (username) => {
-    const colors = [
-      '#667eea', '#764ba2', '#f093fb', '#f5576c', 
-      '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
-      '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'
-    ];
-    
-    const colorIndex = username.charCodeAt(0) % colors.length;
-    const backgroundColor = colors[colorIndex];
-    
-    const initials = username.charAt(0).toUpperCase();
-    
-    return {
-      backgroundColor,
-      initials,
-      color: '#ffffff' 
-    };
+  const colors = [
+    '#667eea', '#764ba2', '#f093fb', '#f5576c', 
+    '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
+    '#a8edea', '#fed6e3', '#ffd1ff', '#c2e9fb',
+    '#84fab0', '#8fd3f4', '#d4fc79', '#96e6a1'
+  ];
+  
+  const colorIndex = (username.length + username.charCodeAt(0)) % colors.length;
+  const backgroundColor = colors[colorIndex];
+  
+  const initials = username.length > 1 
+    ? (username.charAt(0) + username.charAt(username.length - 1)).toUpperCase()
+    : username.charAt(0).toUpperCase();
+  
+  return {
+    backgroundColor,
+    initials,
+    color: '#ffffff'
   };
+};
 
   const sendMessage = () => {
     if (ws.current?.readyState === WebSocket.OPEN && message.trim()) {
