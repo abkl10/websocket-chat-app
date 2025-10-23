@@ -8,6 +8,7 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
+  const [pendingMessages, setPendingMessages] = useState(new Map());
 
   const ws = useRef(null);
   const messagesEndRef = useRef(null);
@@ -27,16 +28,68 @@ export default function Chat() {
 
     ws.current = new WebSocket(`ws://localhost:8181/?token=${encodeURIComponent(token)}`);
 
+    const sendMessage = () => {
+    if (ws.current?.readyState === WebSocket.OPEN && message.trim()) {
+      const tempId = Date.now(); 
+      const newMessage = {
+        id: tempId,
+        username,
+        message: message.trim(),
+        timestamp: new Date().toISOString(),
+        status: 'sending'
+      };
+
+      setMessages(prev => [...prev, newMessage]);
+      setPendingMessages(prev => new Map(prev.set(tempId, newMessage)));
+      
+      ws.current.send(JSON.stringify({ type: 'chat', message: message.trim() }));
+      setMessage('');
+    }
+    };
+
     ws.current.onopen = () => {
       console.log("Connected");
       setConnectionStatus('connected');
     };
 
     ws.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'chat') setMessages(prev => [...prev, data]);
-      if (data.type === 'users') setUsers(data.users);
-    };
+    const data = JSON.parse(event.data);
+    
+    if (data.type === 'chat') {
+      setMessages(prev => {
+        const isOurMessage = data.username === username && 
+                            data.message === Array.from(pendingMessages.values())
+                              .find(msg => msg.message === data.message)?.message;
+        
+        if (isOurMessage) {
+          const pendingMsg = Array.from(pendingMessages.values())
+            .find(msg => msg.message === data.message && msg.status === 'sending');
+          
+          if (pendingMsg) {
+            setPendingMessages(prev => {
+              const newMap = new Map(prev);
+              newMap.delete(pendingMsg.id);
+              return newMap;
+            });
+            
+            return prev.map(msg => 
+              msg.id === pendingMsg.id 
+                ? { ...data, status: 'sent' }
+                : msg
+            );
+          }
+        }
+        
+        return [...prev, { ...data, status: 'sent' }];
+      });
+      
+      if (isNearBottom()) {
+        setTimeout(() => scrollToBottom(), 100);
+      }
+    }
+    
+    if (data.type === 'users') setUsers(data.users);
+  };
 
     ws.current.onclose = () => {
       console.log("Disconnected");
@@ -214,16 +267,21 @@ export default function Chat() {
                 </div>
               ) : (
                 messages.map((msg, index) => (
-                  <div key={index} className="message">
-                    <div className="message-header">
-                      <span className="username">{msg.username} </span>
-                      <span className="timestamp">
-                        {formatMessageTime(msg.timestamp)}
-                      </span>
-                    </div>
-                    <div className="message-content">{msg.message}</div>
-                  </div>
-                )))}
+    <div key={msg.id || index} className="message">
+      <div className="message-header">
+        <span className="username">{msg.username} </span>
+        <span className="timestamp">
+          {formatMessageTime(msg.timestamp)}
+        </span>
+      </div>
+      <div className="message-content">{msg.message}</div>
+      {msg.username === username && (
+        <div className={`message-status ${msg.status}`}>
+          {msg.status === 'sending' ? '⏳ Sending...' : '✓ Sent'}
+        </div>
+      )}
+    </div>
+  )))}
                 
               <div ref={messagesEndRef} />
             </div>
